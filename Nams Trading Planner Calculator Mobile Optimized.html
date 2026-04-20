@@ -1,0 +1,2510 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>Nams Trading Planner Calculator</title>
+  <style>
+    @import url("https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=Manrope:wght@400;500;700;800&display=swap");
+
+    :root {
+      --bg-1: #07111f;
+      --bg-2: #0f1e33;
+      --panel: rgba(9, 19, 34, 0.92);
+      --panel-soft: rgba(18, 35, 58, 0.9);
+      --panel-muted: rgba(255, 255, 255, 0.04);
+      --border: rgba(150, 189, 255, 0.16);
+      --border-strong: rgba(150, 189, 255, 0.24);
+      --text-main: #f4f8ff;
+      --text-soft: #afc2de;
+      --text-dim: #8093b2;
+      --accent: #18d17c;
+      --accent-2: #61b7ff;
+      --gold: #ffbf46;
+      --danger: #ff7a7a;
+      --shadow: 0 22px 52px rgba(1, 9, 18, 0.34);
+      --radius-xl: 26px;
+      --radius-lg: 20px;
+      --radius-md: 15px;
+      --radius-sm: 12px;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: "Manrope", "Segoe UI", sans-serif;
+      color: var(--text-main);
+      -webkit-overflow-scrolling: touch;
+      background:
+        radial-gradient(circle at top left, rgba(24, 209, 124, 0.18), transparent 28%),
+        radial-gradient(circle at top right, rgba(97, 183, 255, 0.17), transparent 30%),
+        radial-gradient(circle at bottom center, rgba(255, 191, 70, 0.12), transparent 28%),
+        linear-gradient(160deg, #041019 0%, #0a1627 44%, #102039 100%);
+      padding: max(12px, env(safe-area-inset-top)) max(12px, env(safe-area-inset-right)) max(12px, env(safe-area-inset-bottom)) max(12px, env(safe-area-inset-left));
+      overflow-x: hidden;
+    }
+
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      background-image:
+        linear-gradient(rgba(255, 255, 255, 0.022) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255, 255, 255, 0.022) 1px, transparent 1px);
+      background-size: 34px 34px;
+      mask-image: radial-gradient(circle at center, black 28%, transparent 88%);
+      opacity: 0.58;
+    }
+
+    .app {
+      position: relative;
+      z-index: 1;
+      max-width: 960px;
+      margin: 0 auto;
+      min-width: 0;
+    }
+
+    .card {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-xl);
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(18px);
+      min-width: 0;
+    }
+
+    .hero {
+      display: grid;
+      gap: 16px;
+      padding: 20px;
+      margin-bottom: 14px;
+      background:
+        linear-gradient(140deg, rgba(15, 29, 51, 0.98), rgba(11, 25, 44, 0.84)),
+        linear-gradient(90deg, rgba(24, 209, 124, 0.08), transparent);
+    }
+
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      font-family: "Space Grotesk", "Segoe UI", sans-serif;
+      font-size: 0.78rem;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: #8ff1c2;
+      margin-bottom: 8px;
+    }
+
+    .eyebrow::before {
+      content: "";
+      width: 9px;
+      height: 9px;
+      border-radius: 999px;
+      background: linear-gradient(135deg, var(--accent), #8bf6bf);
+      box-shadow: 0 0 14px rgba(24, 209, 124, 0.5);
+    }
+
+    .hero h1 {
+      margin: 0;
+      font-family: "Space Grotesk", "Segoe UI", sans-serif;
+      font-size: clamp(2rem, 8vw, 3.2rem);
+      line-height: 0.98;
+      letter-spacing: -0.05em;
+      max-width: 13ch;
+    }
+
+    .hero p {
+      margin: 12px 0 0;
+      color: var(--text-soft);
+      font-size: 0.98rem;
+      line-height: 1.62;
+      max-width: 60ch;
+    }
+
+    .hero-badges {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 16px;
+    }
+
+    .badge {
+      padding: 8px 12px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      color: #dce8fb;
+      font-size: 0.86rem;
+      line-height: 1.25;
+    }
+
+    .hero-notes {
+      display: grid;
+      gap: 12px;
+    }
+
+    .hero-note {
+      padding: 14px 16px;
+      border-radius: var(--radius-lg);
+      background: rgba(255, 255, 255, 0.045);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    .hero-note strong {
+      display: block;
+      margin-bottom: 5px;
+      font-size: 0.95rem;
+    }
+
+    .hero-note span {
+      display: block;
+      color: var(--text-soft);
+      font-size: 0.9rem;
+      line-height: 1.58;
+    }
+
+    .stack {
+      display: grid;
+      gap: 14px;
+      min-width: 0;
+    }
+
+    .section {
+      padding: 18px;
+      min-width: 0;
+    }
+
+    .section-head h2 {
+      margin: 0;
+      font-family: "Space Grotesk", "Segoe UI", sans-serif;
+      font-size: 1.28rem;
+      letter-spacing: -0.03em;
+    }
+
+    .section-head p {
+      margin: 8px 0 0;
+      color: var(--text-soft);
+      line-height: 1.6;
+      font-size: 0.94rem;
+    }
+
+    .field-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px;
+      margin-top: 16px;
+      min-width: 0;
+    }
+
+    .field {
+      display: grid;
+      gap: 7px;
+      min-width: 0;
+    }
+
+    .field label {
+      font-size: 0.8rem;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      color: #90a6c9;
+      font-weight: 800;
+    }
+
+    input,
+    select,
+    button {
+      font: inherit;
+    }
+
+    input,
+    select {
+      width: 100%;
+      min-width: 0;
+      min-height: 48px;
+      border: 1px solid rgba(151, 190, 255, 0.16);
+      background: rgba(7, 18, 33, 0.92);
+      color: var(--text-main);
+      border-radius: var(--radius-md);
+      padding: 13px 14px;
+      font-size: 16px;
+      outline: none;
+      appearance: none;
+      -webkit-appearance: none;
+      transition: border-color 0.18s ease, box-shadow 0.18s ease, transform 0.18s ease;
+    }
+
+    input:focus,
+    select:focus {
+      border-color: rgba(97, 183, 255, 0.64);
+      box-shadow: 0 0 0 4px rgba(97, 183, 255, 0.14);
+      transform: translateY(-1px);
+    }
+
+    .utility-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px;
+      margin-top: 14px;
+      min-width: 0;
+    }
+
+    .toggle-box,
+    .info-box {
+      min-height: 100%;
+      padding: 16px;
+      border-radius: var(--radius-lg);
+      background: rgba(255, 255, 255, 0.045);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    .toggle-box {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+    }
+
+    .toggle-copy strong,
+    .info-box strong {
+      display: block;
+      margin-bottom: 6px;
+      font-family: "Space Grotesk", "Segoe UI", sans-serif;
+      font-size: 1rem;
+      letter-spacing: -0.02em;
+    }
+
+    .toggle-copy span,
+    .info-box span {
+      display: block;
+      color: var(--text-soft);
+      font-size: 0.9rem;
+      line-height: 1.56;
+    }
+
+    .switch {
+      position: relative;
+      width: 62px;
+      height: 34px;
+      flex-shrink: 0;
+    }
+
+    .switch input {
+      position: absolute;
+      inset: 0;
+      opacity: 0;
+      margin: 0;
+      cursor: pointer;
+      z-index: 2;
+    }
+
+    .slider {
+      position: absolute;
+      inset: 0;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.14);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      transition: background 0.22s ease;
+    }
+
+    .slider::before {
+      content: "";
+      position: absolute;
+      width: 26px;
+      height: 26px;
+      border-radius: 50%;
+      left: 4px;
+      top: 3px;
+      background: #ffffff;
+      box-shadow: 0 8px 14px rgba(0, 0, 0, 0.28);
+      transition: transform 0.22s ease;
+    }
+
+    .switch input:checked + .slider {
+      background: linear-gradient(135deg, rgba(24, 209, 124, 0.96), rgba(97, 183, 255, 0.88));
+    }
+
+    .switch input:checked + .slider::before {
+      transform: translateX(28px);
+    }
+
+    .action-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 14px;
+    }
+
+    .btn {
+      border: none;
+      border-radius: var(--radius-md);
+      padding: 15px 18px;
+      min-height: 48px;
+      cursor: pointer;
+      font-weight: 800;
+      letter-spacing: 0.01em;
+      transition: transform 0.16s ease, box-shadow 0.16s ease;
+      min-width: 150px;
+    }
+
+    .btn:hover,
+    .mini-btn:hover {
+      transform: translateY(-1px);
+    }
+
+    .btn-primary {
+      color: #04111d;
+      background: linear-gradient(135deg, #9bffd0 0%, #18d17c 45%, #53b6ff 100%);
+      box-shadow: 0 18px 36px rgba(24, 209, 124, 0.24);
+    }
+
+    .btn-secondary {
+      color: var(--text-main);
+      background: linear-gradient(135deg, rgba(97, 183, 255, 0.25), rgba(97, 183, 255, 0.1));
+      border: 1px solid rgba(97, 183, 255, 0.2);
+    }
+
+    .btn-ghost {
+      color: var(--text-main);
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .status {
+      display: none;
+      padding: 14px 16px;
+      border-radius: 18px;
+      font-weight: 700;
+      line-height: 1.55;
+    }
+
+    .status.show {
+      display: block;
+    }
+
+    .status.success {
+      background: rgba(24, 209, 124, 0.12);
+      border: 1px solid rgba(24, 209, 124, 0.3);
+      color: #b8f8d6;
+    }
+
+    .status.warning {
+      background: rgba(255, 191, 70, 0.12);
+      border: 1px solid rgba(255, 191, 70, 0.28);
+      color: #ffe3a8;
+    }
+
+    .status.error {
+      background: rgba(255, 122, 122, 0.12);
+      border: 1px solid rgba(255, 122, 122, 0.3);
+      color: #ffd1d1;
+    }
+
+    .summary-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px;
+      min-width: 0;
+    }
+
+    .summary-card {
+      padding: 16px;
+      border-radius: 20px;
+      background:
+        linear-gradient(160deg, rgba(12, 27, 47, 0.92), rgba(13, 24, 41, 0.74));
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      min-height: 122px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      gap: 10px;
+      min-width: 0;
+    }
+
+    .summary-card.emphasis {
+      background:
+        linear-gradient(160deg, rgba(15, 46, 55, 0.9), rgba(11, 26, 46, 0.94)),
+        rgba(255, 255, 255, 0.06);
+      border-color: rgba(24, 209, 124, 0.22);
+    }
+
+    .summary-label {
+      font-size: 0.76rem;
+      letter-spacing: 0.09em;
+      text-transform: uppercase;
+      color: #89a3ca;
+      font-weight: 800;
+    }
+
+    .summary-value {
+      font-family: "Space Grotesk", "Segoe UI", sans-serif;
+      font-size: 1.18rem;
+      line-height: 1.14;
+      letter-spacing: -0.03em;
+      word-break: break-word;
+    }
+
+    .summary-context {
+      color: var(--text-soft);
+      line-height: 1.5;
+      font-size: 0.88rem;
+    }
+
+    .timeline {
+      display: grid;
+      gap: 12px;
+      margin-top: 16px;
+    }
+
+    .timeline-card {
+      padding: 16px;
+      border-radius: var(--radius-lg);
+      background: var(--panel-soft);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      min-width: 0;
+    }
+
+    .timeline-head,
+    .section-row {
+      display: flex;
+      align-items: start;
+      justify-content: space-between;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .mini-btn {
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      background: rgba(255, 255, 255, 0.05);
+      color: var(--text-main);
+      padding: 12px 14px;
+      min-height: 44px;
+      border-radius: 999px;
+      cursor: pointer;
+      font-weight: 700;
+    }
+
+    .event-list {
+      display: grid;
+      gap: 12px;
+      margin-top: 12px;
+    }
+
+    .placeholder {
+      border-radius: var(--radius-md);
+      padding: 16px;
+      border: 1px dashed rgba(151, 190, 255, 0.24);
+      background: rgba(255, 255, 255, 0.025);
+      color: var(--text-soft);
+      line-height: 1.6;
+      font-size: 0.92rem;
+    }
+
+    .event-row {
+      position: relative;
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px;
+      padding: 16px;
+      padding-right: 58px;
+      border-radius: 18px;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.09);
+      overflow: hidden;
+      min-width: 0;
+    }
+
+    .event-row::before {
+      content: "";
+      position: absolute;
+      left: 0;
+      top: 0;
+      bottom: 0;
+      width: 4px;
+      background: linear-gradient(180deg, rgba(97, 183, 255, 0.95), rgba(24, 209, 124, 0.95));
+    }
+
+    .withdrawal-row::before {
+      background: linear-gradient(180deg, rgba(255, 191, 70, 0.95), rgba(255, 122, 122, 0.95));
+    }
+
+    .event-row.incomplete {
+      border-color: rgba(255, 122, 122, 0.4);
+      box-shadow: inset 0 0 0 1px rgba(255, 122, 122, 0.16);
+    }
+
+    .remove-btn {
+      position: absolute;
+      top: 14px;
+      right: 14px;
+      width: 34px;
+      height: 34px;
+      border-radius: 12px;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      background: rgba(255, 122, 122, 0.08);
+      color: #ffd4d4;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+    }
+
+    .hidden {
+      display: none !important;
+    }
+
+    .chart-wrap {
+      margin-top: 14px;
+    }
+
+    #balanceChart {
+      width: 100%;
+      height: 270px;
+      display: block;
+      border-radius: 18px;
+      background: linear-gradient(180deg, rgba(255, 255, 255, 0.03), rgba(255, 255, 255, 0.015));
+      border: 1px solid rgba(255, 255, 255, 0.06);
+    }
+
+    .legend {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      color: var(--text-soft);
+      font-size: 0.88rem;
+    }
+
+    .legend span {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .legend i {
+      width: 10px;
+      height: 10px;
+      border-radius: 999px;
+      display: inline-block;
+    }
+
+    .legend .line {
+      background: var(--accent);
+    }
+
+    .legend .rate {
+      background: var(--gold);
+    }
+
+    .legend .withdraw {
+      background: var(--danger);
+    }
+
+    .table-meta {
+      color: var(--text-soft);
+      font-size: 0.9rem;
+      line-height: 1.5;
+    }
+
+    .table-wrap {
+      margin-top: 14px;
+      overflow-x: auto;
+      overflow-y: hidden;
+      max-width: 100%;
+      border-radius: 18px;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      background: rgba(7, 18, 33, 0.52);
+      -webkit-overflow-scrolling: touch;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      min-width: 760px;
+    }
+
+    thead th {
+      position: sticky;
+      top: 0;
+      z-index: 1;
+      background: rgba(8, 19, 34, 0.96);
+      color: #bed0eb;
+      text-align: left;
+      font-size: 0.76rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      padding: 12px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      white-space: nowrap;
+    }
+
+    tbody td {
+      padding: 12px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+      vertical-align: top;
+      color: #edf3ff;
+      font-size: 0.88rem;
+    }
+
+    tbody tr:hover {
+      background: rgba(255, 255, 255, 0.03);
+    }
+
+    .day-pill {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 66px;
+      padding: 7px 10px;
+      border-radius: 999px;
+      background: rgba(97, 183, 255, 0.12);
+      border: 1px solid rgba(97, 183, 255, 0.18);
+      font-weight: 800;
+      color: #cde8ff;
+    }
+
+    .date-stack {
+      display: grid;
+      gap: 3px;
+    }
+
+    .date-stack strong {
+      font-size: 0.92rem;
+    }
+
+    .date-stack span {
+      color: var(--text-dim);
+      font-size: 0.82rem;
+    }
+
+    .rate-tag {
+      display: inline-flex;
+      padding: 7px 10px;
+      border-radius: 999px;
+      background: rgba(24, 209, 124, 0.12);
+      border: 1px solid rgba(24, 209, 124, 0.18);
+      color: #b6f8d6;
+      font-weight: 800;
+    }
+
+    .notes-wrap {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      max-width: 320px;
+    }
+
+
+    .mobile-cards {
+      display: none;
+      gap: 12px;
+      margin-top: 14px;
+    }
+
+    .mobile-result-card {
+      padding: 14px;
+      border-radius: 18px;
+      background: rgba(7, 18, 33, 0.7);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      display: grid;
+      gap: 12px;
+    }
+
+    .mobile-result-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .mobile-result-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+    }
+
+    .mobile-metric {
+      padding: 10px 12px;
+      border-radius: 14px;
+      background: rgba(255, 255, 255, 0.045);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      min-width: 0;
+    }
+
+    .mobile-metric-label {
+      display: block;
+      font-size: 0.72rem;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: #8ea6cb;
+      font-weight: 800;
+      margin-bottom: 5px;
+    }
+
+    .mobile-metric-value {
+      display: block;
+      font-size: 0.92rem;
+      color: #edf3ff;
+      word-break: break-word;
+    }
+
+    .note-chip {
+      display: inline-flex;
+      align-items: center;
+      padding: 6px 9px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      color: #dfe8f7;
+      font-size: 0.8rem;
+      line-height: 1.34;
+    }
+
+    .note-chip.soft {
+      color: var(--text-soft);
+      background: rgba(255, 255, 255, 0.03);
+    }
+
+    .rules-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 12px;
+      margin-top: 14px;
+    }
+
+    .rule {
+      padding: 14px;
+      border-radius: var(--radius-md);
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    .rule strong {
+      display: block;
+      margin-bottom: 6px;
+      font-size: 0.95rem;
+      color: #edf4ff;
+    }
+
+    .rule span {
+      display: block;
+      color: var(--text-soft);
+      font-size: 0.9rem;
+      line-height: 1.55;
+    }
+
+    .footer {
+      margin-top: 14px;
+      padding: 0 2px;
+      color: var(--text-dim);
+      font-size: 0.9rem;
+      line-height: 1.66;
+    }
+
+    .footer strong {
+      color: #d9e7fb;
+    }
+
+    @media (min-width: 860px) {
+      .hero {
+        grid-template-columns: minmax(0, 1.2fr) minmax(250px, 0.85fr);
+      }
+    }
+
+    @media (max-width: 760px) {
+      .field-grid,
+      .summary-grid,
+      .rules-grid,
+      .utility-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 620px) {
+      body {
+        padding: max(10px, env(safe-area-inset-top)) max(10px, env(safe-area-inset-right)) max(10px, env(safe-area-inset-bottom)) max(10px, env(safe-area-inset-left));
+      }
+
+      .hero,
+      .section {
+        padding: 16px;
+      }
+
+      .hero h1 {
+        max-width: none;
+      }
+
+      .hero p {
+        font-size: 0.93rem;
+      }
+
+      .badge {
+        font-size: 0.78rem;
+        padding: 7px 10px;
+      }
+
+      .action-row {
+        position: sticky;
+        bottom: 0;
+        z-index: 8;
+        flex-direction: column;
+        padding: 10px;
+        margin: 14px -4px -4px;
+        background: rgba(6, 16, 29, 0.96);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        border-radius: 18px;
+        backdrop-filter: blur(14px);
+      }
+
+      .btn,
+      .mini-btn {
+        width: 100%;
+        min-width: 0;
+      }
+
+      .timeline-head,
+      .section-row,
+      .toggle-box {
+        flex-direction: column;
+        align-items: stretch;
+      }
+
+      .event-row {
+        grid-template-columns: 1fr;
+        padding-right: 16px;
+      }
+
+      .remove-btn {
+        position: static;
+        margin-top: 2px;
+        width: 100%;
+        height: 44px;
+      }
+
+      #balanceChart {
+        height: 228px;
+      }
+
+      .table-wrap {
+        display: none;
+      }
+
+      .mobile-cards {
+        display: grid;
+      }
+
+      .mobile-result-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <section class="hero card">
+      <div>
+        <div class="eyebrow">Forex Trading Planner</div>
+        <h1>Nams Trading Planner Calculator</h1>
+        <p>
+          A mobile-friendly trading planner for daily target changes, date-based strategy shifts,
+          symbol-only currency switching, and scheduled withdrawals by amount or percentage.
+        </p>
+        <div class="hero-badges">
+          <span class="badge">iPhone-friendly layout</span>
+          <span class="badge">Currency options built in</span>
+          <span class="badge">Stacked rate changes</span>
+          <span class="badge">Fixed and % withdrawals</span>
+        </div>
+      </div>
+
+      <div class="hero-notes">
+        <div class="hero-note">
+          <strong>Example plan</strong>
+          <span>Keep 10% for the first 5 trading days, then shift to 5%, then 3.5%, while scheduling withdrawals along the way.</span>
+        </div>
+        <div class="hero-note">
+          <strong>Built to fit</strong>
+          <span>The page stacks naturally on phones so the planner stays readable at normal zoom instead of pushing content off screen.</span>
+        </div>
+      </div>
+    </section>
+
+    <div class="stack">
+      <section class="card section">
+        <div class="section-head">
+          <h2>Plan Setup</h2>
+          <p>Set your starting capital, base target, plan length, and optional goal. The selected currency only changes the displayed symbol.</p>
+        </div>
+
+        <div class="field-grid">
+          <div class="field">
+            <label for="initialAmount">Starting Balance</label>
+            <input type="number" id="initialAmount" min="0" step="0.01" placeholder="1000">
+          </div>
+          <div class="field">
+            <label for="accountCurrency">Currency Symbol</label>
+            <select id="accountCurrency">
+              <option value="USD">$ USD - US Dollar</option>
+              <option value="ZAR">R ZAR - South African Rand</option>
+              <option value="EUR">EUR - Euro</option>
+              <option value="GBP">GBP - British Pound</option>
+              <option value="NAD">N$ NAD - Namibian Dollar</option>
+              <option value="BWP">P BWP - Botswana Pula</option>
+              <option value="AUD">A$ AUD - Australian Dollar</option>
+              <option value="CAD">C$ CAD - Canadian Dollar</option>
+              <option value="CHF">CHF - Swiss Franc</option>
+              <option value="JPY">JPY - Japanese Yen</option>
+              <option value="AED">AED - UAE Dirham</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="dailyRate">Base Daily Target (%)</label>
+            <input type="number" id="dailyRate" min="0" step="0.01" placeholder="10">
+          </div>
+          <div class="field">
+            <label for="days">Plan Length (Active Days)</label>
+            <input type="number" id="days" min="1" step="1" placeholder="20">
+          </div>
+          <div class="field">
+            <label for="startDate">Start Date</label>
+            <input type="date" id="startDate" placeholder="YYYY-MM-DD">
+          </div>
+          <div class="field">
+            <label for="goalAmount">Goal Amount (Optional)</label>
+            <input type="number" id="goalAmount" min="0" step="0.01" placeholder="5000">
+          </div>
+        </div>
+
+        <div class="utility-grid">
+          <div class="toggle-box">
+            <div class="toggle-copy">
+              <strong>Include weekends</strong>
+              <span>Turn this off if the planner should count trading days only.</span>
+            </div>
+            <label class="switch">
+              <input type="checkbox" id="includeWeekends">
+              <span class="slider"></span>
+            </label>
+          </div>
+
+          <div class="info-box">
+            <strong>Currency Symbol Only</strong>
+            <span>The calculator does not convert currencies. It only changes the symbol and display format used across the planner.</span>
+          </div>
+        </div>
+
+        <div class="action-row">
+          <button class="btn btn-primary" id="calculateBtn" type="button">Build Trading Plan</button>
+          <button class="btn btn-secondary" id="exampleBtn" type="button">Load Example</button>
+          <button class="btn btn-ghost" id="resetBtn" type="button">Reset</button>
+        </div>
+      </section>
+
+      <div class="status" id="plannerStatus"></div>
+
+      <section class="summary-grid" id="summaryCards"></section>
+
+      <section class="card section">
+        <div class="section-head">
+          <h2>Timeline Builder</h2>
+          <p>Add and stack as many target changes and withdrawals as you need. Every event can start on a trading day number or an exact date.</p>
+        </div>
+
+        <div class="timeline">
+          <div class="timeline-card">
+            <div class="timeline-head">
+              <div>
+                <h2 style="font-size:1.08rem;margin:0;">Daily Target Changes</h2>
+                <p class="section-head" style="margin:6px 0 0;color:var(--text-soft);font-size:0.9rem;">Step the daily target down or up over time.</p>
+              </div>
+              <button class="mini-btn" id="addRateChangeBtn" type="button">Add Rate Change</button>
+            </div>
+            <div class="event-list" id="rateChangesList"></div>
+          </div>
+
+          <div class="timeline-card">
+            <div class="timeline-head">
+              <div>
+                <h2 style="font-size:1.08rem;margin:0;">Withdrawals</h2>
+                <p class="section-head" style="margin:6px 0 0;color:var(--text-soft);font-size:0.9rem;">Withdraw by fixed amount or percentage of balance.</p>
+              </div>
+              <button class="mini-btn" id="addWithdrawalBtn" type="button">Add Withdrawal</button>
+            </div>
+            <div class="event-list" id="withdrawalsList"></div>
+          </div>
+        </div>
+      </section>
+
+      <section class="card section">
+        <div class="section-row">
+          <div class="section-head">
+            <h2>Balance Curve</h2>
+            <p>Projected closing balance across your active trading days.</p>
+          </div>
+          <div class="legend">
+            <span><i class="line"></i> Balance</span>
+            <span><i class="rate"></i> Rate change</span>
+            <span><i class="withdraw"></i> Withdrawal</span>
+          </div>
+        </div>
+
+        <div class="chart-wrap">
+          <canvas id="balanceChart" width="1200" height="270"></canvas>
+        </div>
+      </section>
+
+      <section class="card section">
+        <div class="section-row">
+          <div class="section-head">
+            <h2>Daily Breakdown</h2>
+            <p>Opening balance, growth, withdrawals, and closing balance for each active day.</p>
+          </div>
+          <div class="table-meta" id="tableMeta"></div>
+        </div>
+
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Day</th>
+                <th>Date</th>
+                <th>Target</th>
+                <th>Opening</th>
+                <th>Withdraw Before</th>
+                <th>Interest</th>
+                <th>Withdraw After</th>
+                <th>Closing</th>
+                <th>Notes</th>
+              </tr>
+            </thead>
+            <tbody id="resultsBody"></tbody>
+          </table>
+        </div>
+        <div class="mobile-cards" id="mobileResults"></div>
+      </section>
+
+      <section class="card section">
+        <div class="section-head">
+          <h2>Planner Rules</h2>
+          <p>These rules keep the forecast consistent when you stack multiple events.</p>
+        </div>
+        <div class="rules-grid">
+          <div class="rule">
+            <strong>Rate changes stay active</strong>
+            <span>Once a new daily target begins, it stays active until another scheduled target replaces it.</span>
+          </div>
+          <div class="rule">
+            <strong>Date events respect trading days</strong>
+            <span>If weekends are off, date-based events shift onto the first valid active day on or after that date.</span>
+          </div>
+          <div class="rule">
+            <strong>Withdrawals can stack</strong>
+            <span>Multiple withdrawals on the same day are supported, both as fixed amounts and as percentages.</span>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <p class="footer">
+      <strong>Nams Forex Trading Planner</strong> is meant for planning and scenario testing. It does not promise trading returns, but it gives a clearer way to map changing targets and withdrawals.
+    </p>
+  </div>
+
+  <template id="rateChangeTemplate">
+    <div class="event-row rate-row">
+      <div class="field">
+        <label>Effective From</label>
+        <select class="event-trigger">
+          <option value="day">Trading Day</option>
+          <option value="date">Date</option>
+        </select>
+      </div>
+      <div class="field trigger-day-field">
+        <label>Trading Day #</label>
+        <input type="number" class="trigger-day" min="1" step="1" placeholder="6">
+      </div>
+      <div class="field trigger-date-field hidden">
+        <label>Date</label>
+        <input type="date" class="trigger-date" placeholder="YYYY-MM-DD">
+      </div>
+      <div class="field">
+        <label>Daily Target (%)</label>
+        <input type="number" class="rate-value" min="0" step="0.01" placeholder="5">
+      </div>
+      <div class="field">
+        <label>Label (Optional)</label>
+        <input type="text" class="event-label" maxlength="40" placeholder="Safer phase">
+      </div>
+      <button class="remove-btn remove-event" type="button" aria-label="Remove rate change">X</button>
+    </div>
+  </template>
+
+  <template id="withdrawalTemplate">
+    <div class="event-row withdrawal-row">
+      <div class="field">
+        <label>When</label>
+        <select class="event-trigger">
+          <option value="day">Trading Day</option>
+          <option value="date">Date</option>
+        </select>
+      </div>
+      <div class="field trigger-day-field">
+        <label>Trading Day #</label>
+        <input type="number" class="trigger-day" min="1" step="1" placeholder="8">
+      </div>
+      <div class="field trigger-date-field hidden">
+        <label>Date</label>
+        <input type="date" class="trigger-date" placeholder="YYYY-MM-DD">
+      </div>
+      <div class="field">
+        <label>Withdraw By</label>
+        <select class="withdraw-kind">
+          <option value="amount">Fixed Amount</option>
+          <option value="percent">% of Balance</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>Value</label>
+        <input type="number" class="withdraw-value" min="0" step="0.01" placeholder="100">
+      </div>
+      <div class="field">
+        <label>Timing</label>
+        <select class="withdraw-timing">
+          <option value="before">Before Target</option>
+          <option value="after">After Target</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>Label (Optional)</label>
+        <input type="text" class="event-label" maxlength="40" placeholder="Take profit">
+      </div>
+      <button class="remove-btn remove-event" type="button" aria-label="Remove withdrawal">X</button>
+    </div>
+  </template>
+
+  <script>
+    var STORAGE_KEY = "nams-trading-planner-mobile-v1";
+    var dom = {};
+    var latestPlan = null;
+    var resizeTimer = null;
+
+    var CURRENCY_META = {
+      USD: { symbol: "$", suffix: "" },
+      ZAR: { symbol: "R", suffix: "" },
+      EUR: { symbol: "EUR ", suffix: "" },
+      GBP: { symbol: "GBP ", suffix: "" },
+      NAD: { symbol: "N$ ", suffix: "" },
+      BWP: { symbol: "P ", suffix: "" },
+      AUD: { symbol: "A$ ", suffix: "" },
+      CAD: { symbol: "C$ ", suffix: "" },
+      CHF: { symbol: "CHF ", suffix: "" },
+      JPY: { symbol: "JPY ", suffix: "" },
+      AED: { symbol: "AED ", suffix: "" }
+    };
+
+    function onReady(callback) {
+      if (document.readyState === "loading") {
+        document.addEventListener("DOMContentLoaded", callback);
+      } else {
+        callback();
+      }
+    }
+
+    function cacheDom() {
+      dom.initialAmount = document.getElementById("initialAmount");
+      dom.accountCurrency = document.getElementById("accountCurrency");
+      dom.dailyRate = document.getElementById("dailyRate");
+      dom.days = document.getElementById("days");
+      dom.startDate = document.getElementById("startDate");
+      dom.goalAmount = document.getElementById("goalAmount");
+      dom.includeWeekends = document.getElementById("includeWeekends");
+      dom.calculateBtn = document.getElementById("calculateBtn");
+      dom.exampleBtn = document.getElementById("exampleBtn");
+      dom.resetBtn = document.getElementById("resetBtn");
+      dom.addRateChangeBtn = document.getElementById("addRateChangeBtn");
+      dom.addWithdrawalBtn = document.getElementById("addWithdrawalBtn");
+      dom.rateChangesList = document.getElementById("rateChangesList");
+      dom.withdrawalsList = document.getElementById("withdrawalsList");
+      dom.status = document.getElementById("plannerStatus");
+      dom.summaryCards = document.getElementById("summaryCards");
+      dom.resultsBody = document.getElementById("resultsBody");
+      dom.mobileResults = document.getElementById("mobileResults");
+      dom.tableMeta = document.getElementById("tableMeta");
+      dom.balanceChart = document.getElementById("balanceChart");
+      dom.rateTemplate = document.getElementById("rateChangeTemplate");
+      dom.withdrawalTemplate = document.getElementById("withdrawalTemplate");
+    }
+
+    function bindEvents() {
+      var liveFields = [
+        dom.initialAmount,
+        dom.accountCurrency,
+        dom.dailyRate,
+        dom.days,
+        dom.startDate,
+        dom.goalAmount,
+        dom.includeWeekends
+      ];
+
+      var i;
+      for (i = 0; i < liveFields.length; i += 1) {
+        bindLiveField(liveFields[i]);
+      }
+
+      dom.calculateBtn.addEventListener("click", function () {
+        calculatePlan(false);
+      });
+
+      dom.exampleBtn.addEventListener("click", function () {
+        loadExampleScenario();
+      });
+
+      dom.resetBtn.addEventListener("click", function () {
+        resetPlanner();
+      });
+
+      dom.addRateChangeBtn.addEventListener("click", function () {
+        addRateChangeRow();
+        saveState();
+        calculatePlan(true);
+      });
+
+      dom.addWithdrawalBtn.addEventListener("click", function () {
+        addWithdrawalRow();
+        saveState();
+        calculatePlan(true);
+      });
+
+      bindEventList(dom.rateChangesList, "rate");
+      bindEventList(dom.withdrawalsList, "withdrawal");
+
+      window.addEventListener("resize", function () {
+        window.clearTimeout(resizeTimer);
+        resizeTimer = window.setTimeout(function () {
+          if (latestPlan) {
+            drawChart(latestPlan.results, latestPlan.settings);
+          }
+        }, 120);
+      });
+    }
+
+    function bindLiveField(field) {
+      field.addEventListener("input", function () {
+        saveState();
+        calculatePlan(true);
+      });
+
+      field.addEventListener("change", function () {
+        saveState();
+        calculatePlan(true);
+      });
+    }
+
+    function bindEventList(container, kind) {
+      container.addEventListener("click", function (event) {
+        var removeButton = event.target.closest(".remove-event");
+        var row;
+
+        if (!removeButton) {
+          return;
+        }
+
+        row = removeButton.closest(".event-row");
+        if (row) {
+          row.remove();
+          refreshListPlaceholder(container, kind);
+          saveState();
+          calculatePlan(true);
+        }
+      });
+
+      container.addEventListener("change", function (event) {
+        var row = event.target.closest(".event-row");
+        if (!row) {
+          return;
+        }
+
+        if (event.target.classList.contains("event-trigger")) {
+          toggleTriggerFields(row);
+        }
+
+        saveState();
+        calculatePlan(true);
+      });
+
+      container.addEventListener("input", function (event) {
+        var row = event.target.closest(".event-row");
+        if (!row) {
+          return;
+        }
+
+        saveState();
+        calculatePlan(true);
+      });
+    }
+
+    function applyDefaults() {
+      dom.initialAmount.value = "1000";
+      dom.accountCurrency.value = "USD";
+      dom.dailyRate.value = "10";
+      dom.days.value = "20";
+      dom.startDate.value = formatDateInput(new Date());
+      dom.goalAmount.value = "";
+      dom.includeWeekends.checked = false;
+      clearEventRows(dom.rateChangesList);
+      clearEventRows(dom.withdrawalsList);
+      refreshListPlaceholder(dom.rateChangesList, "rate");
+      refreshListPlaceholder(dom.withdrawalsList, "withdrawal");
+    }
+
+    function resetPlanner() {
+      safeStorageRemove(STORAGE_KEY);
+      latestPlan = null;
+      applyDefaults();
+      setStatus("Planner reset to starter values.", "success");
+      calculatePlan(true);
+    }
+
+    function loadExampleScenario() {
+      var start = parseDateValue(dom.startDate.value) || new Date();
+
+      dom.initialAmount.value = "500";
+      dom.accountCurrency.value = "USD";
+      dom.dailyRate.value = "10";
+      dom.days.value = "22";
+      dom.startDate.value = formatDateInput(start);
+      dom.goalAmount.value = "2000";
+      dom.includeWeekends.checked = false;
+
+      clearEventRows(dom.rateChangesList);
+      clearEventRows(dom.withdrawalsList);
+
+      addRateChangeRow({
+        triggerType: "day",
+        dayNumber: 6,
+        ratePercent: 5,
+        label: "Lower daily target"
+      });
+
+      addRateChangeRow({
+        triggerType: "date",
+        date: formatDateInput(addDays(cloneDate(start), 10)),
+        ratePercent: 3.5,
+        label: "Capital protection phase"
+      });
+
+      addWithdrawalRow({
+        triggerType: "day",
+        dayNumber: 8,
+        mode: "amount",
+        value: 120,
+        timing: "after",
+        label: "Locked profit"
+      });
+
+      addWithdrawalRow({
+        triggerType: "date",
+        date: formatDateInput(addDays(cloneDate(start), 16)),
+        mode: "percent",
+        value: 10,
+        timing: "before",
+        label: "Risk reset"
+      });
+
+      saveState();
+      calculatePlan(false);
+    }
+
+    function clearEventRows(container) {
+      var rows = container.querySelectorAll(".event-row");
+      var i;
+      for (i = 0; i < rows.length; i += 1) {
+        rows[i].remove();
+      }
+    }
+
+    function addRateChangeRow(data) {
+      var row = dom.rateTemplate.content.firstElementChild.cloneNode(true);
+      var payload = data || {};
+
+      row.querySelector(".event-trigger").value = payload.triggerType || "day";
+      row.querySelector(".trigger-day").value = payload.dayNumber || "";
+      row.querySelector(".trigger-date").value = payload.date || "";
+      row.querySelector(".rate-value").value =
+        payload.ratePercent !== undefined && payload.ratePercent !== null ? payload.ratePercent : "";
+      row.querySelector(".event-label").value = payload.label || "";
+
+      dom.rateChangesList.appendChild(row);
+      toggleTriggerFields(row);
+      refreshListPlaceholder(dom.rateChangesList, "rate");
+      return row;
+    }
+
+    function addWithdrawalRow(data) {
+      var row = dom.withdrawalTemplate.content.firstElementChild.cloneNode(true);
+      var payload = data || {};
+
+      row.querySelector(".event-trigger").value = payload.triggerType || "day";
+      row.querySelector(".trigger-day").value = payload.dayNumber || "";
+      row.querySelector(".trigger-date").value = payload.date || "";
+      row.querySelector(".withdraw-kind").value = payload.mode || "amount";
+      row.querySelector(".withdraw-value").value =
+        payload.value !== undefined && payload.value !== null ? payload.value : "";
+      row.querySelector(".withdraw-timing").value = payload.timing || "after";
+      row.querySelector(".event-label").value = payload.label || "";
+
+      dom.withdrawalsList.appendChild(row);
+      toggleTriggerFields(row);
+      refreshListPlaceholder(dom.withdrawalsList, "withdrawal");
+      return row;
+    }
+
+    function toggleTriggerFields(row) {
+      var triggerType = row.querySelector(".event-trigger").value;
+      var dayField = row.querySelector(".trigger-day-field");
+      var dateField = row.querySelector(".trigger-date-field");
+      var dateInput = row.querySelector(".trigger-date");
+
+      if (triggerType === "day") {
+        dayField.classList.remove("hidden");
+        dateField.classList.add("hidden");
+      } else {
+        dayField.classList.add("hidden");
+        dateField.classList.remove("hidden");
+        if (!dateInput.value) {
+          dateInput.value = dom.startDate.value || formatDateInput(new Date());
+        }
+      }
+    }
+
+    function refreshListPlaceholder(container, kind) {
+      var placeholder = container.querySelector(".placeholder");
+      var hasRow = container.querySelector(".event-row");
+
+      if (hasRow) {
+        if (placeholder) {
+          placeholder.remove();
+        }
+        return;
+      }
+
+      if (!placeholder) {
+        placeholder = document.createElement("div");
+        placeholder.className = "placeholder";
+        if (kind === "rate") {
+          placeholder.textContent = "No scheduled target changes yet. Your base daily target stays active for the whole plan.";
+        } else {
+          placeholder.textContent = "No withdrawals scheduled yet. Add fixed amounts or balance percentages whenever you want to take profit.";
+        }
+        container.appendChild(placeholder);
+      }
+    }
+
+    function calculatePlan(silent) {
+      var settings = readSettings();
+      var rateInput;
+      var withdrawalInput;
+      var resolvedRates;
+      var resolvedWithdrawals;
+      var activeDays;
+      var warnings = [];
+      var currentBalance;
+      var currentRate;
+      var totalInterest = 0;
+      var totalWithdrawals = 0;
+      var peakBalance;
+      var results = [];
+      var i;
+
+      if (!settings.ok) {
+        latestPlan = null;
+        renderEmptyState(settings.message);
+        setStatus(settings.message, silent ? "warning" : "error");
+        saveState();
+        return;
+      }
+
+      activeDays = buildActiveDays(settings.startDate, settings.days, settings.includeWeekends);
+      rateInput = readRateChanges();
+      withdrawalInput = readWithdrawals();
+      resolvedRates = resolveTimedEvents(rateInput.events, activeDays);
+      resolvedWithdrawals = resolveTimedEvents(withdrawalInput.events, activeDays);
+
+      if (rateInput.incompleteCount > 0) {
+        warnings.push(rateInput.incompleteCount + " incomplete rate change(s) were ignored.");
+      }
+
+      if (withdrawalInput.incompleteCount > 0) {
+        warnings.push(withdrawalInput.incompleteCount + " incomplete withdrawal(s) were ignored.");
+      }
+
+      if (resolvedRates.skippedCount > 0) {
+        warnings.push(resolvedRates.skippedCount + " rate change(s) fell outside the plan window.");
+      }
+
+      if (resolvedWithdrawals.skippedCount > 0) {
+        warnings.push(resolvedWithdrawals.skippedCount + " withdrawal(s) fell outside the plan window.");
+      }
+
+      currentBalance = settings.initialAmount;
+      currentRate = settings.baseDailyRate;
+      peakBalance = settings.initialAmount;
+
+      for (i = 0; i < activeDays.length; i += 1) {
+        results.push(
+          buildDayResult(
+            i + 1,
+            activeDays[i],
+            settings,
+            resolvedRates.byDay,
+            resolvedWithdrawals.byDay,
+            {
+              currentBalance: currentBalance,
+              currentRate: currentRate,
+              totalInterest: totalInterest,
+              totalWithdrawals: totalWithdrawals,
+              peakBalance: peakBalance
+            }
+          )
+        );
+
+        currentBalance = results[i].state.currentBalance;
+        currentRate = results[i].state.currentRate;
+        totalInterest = results[i].state.totalInterest;
+        totalWithdrawals = results[i].state.totalWithdrawals;
+        peakBalance = results[i].state.peakBalance;
+      }
+
+      for (i = 0; i < results.length; i += 1) {
+        delete results[i].state;
+      }
+
+      renderPlan(settings, activeDays, results, totalInterest, totalWithdrawals, peakBalance, warnings, silent);
+      saveState();
+    }
+
+    function buildDayResult(dayNumber, date, settings, rateMap, withdrawalMap, state) {
+      var notes = [];
+      var rateEvents = rateMap[dayNumber] || [];
+      var withdrawalEvents = withdrawalMap[dayNumber] || [];
+      var openingBalance = state.currentBalance;
+      var workingBalance = openingBalance;
+      var withdrawnBefore = 0;
+      var withdrawnAfter = 0;
+      var interest;
+      var idx;
+      var event;
+      var amount;
+
+      for (idx = 0; idx < rateEvents.length; idx += 1) {
+        event = rateEvents[idx];
+        state.currentRate = event.rateDecimal;
+        notes.push("Rate now " + formatPercent(event.ratePercent) + (event.label ? " (" + event.label + ")" : ""));
+      }
+
+      for (idx = 0; idx < withdrawalEvents.length; idx += 1) {
+        event = withdrawalEvents[idx];
+        if (event.timing === "before") {
+          amount = computeWithdrawalAmount(workingBalance, event);
+          workingBalance -= amount;
+          withdrawnBefore += amount;
+          state.totalWithdrawals += amount;
+          notes.push(buildWithdrawalNote(event, amount, settings));
+        }
+      }
+
+      interest = workingBalance * state.currentRate;
+      state.totalInterest += interest;
+      workingBalance += interest;
+
+      for (idx = 0; idx < withdrawalEvents.length; idx += 1) {
+        event = withdrawalEvents[idx];
+        if (event.timing === "after") {
+          amount = computeWithdrawalAmount(workingBalance, event);
+          workingBalance -= amount;
+          withdrawnAfter += amount;
+          state.totalWithdrawals += amount;
+          notes.push(buildWithdrawalNote(event, amount, settings));
+        }
+      }
+
+      state.currentBalance = Math.max(0, workingBalance);
+      state.peakBalance = Math.max(state.peakBalance, state.currentBalance);
+
+      return {
+        tradingDay: dayNumber,
+        date: date,
+        ratePercent: state.currentRate * 100,
+        openingBalance: openingBalance,
+        withdrawnBefore: withdrawnBefore,
+        interest: interest,
+        withdrawnAfter: withdrawnAfter,
+        closingBalance: state.currentBalance,
+        notes: notes,
+        rateChanged: rateEvents.length > 0,
+        hadWithdrawal: withdrawalEvents.length > 0,
+        state: state
+      };
+    }
+
+    function renderPlan(settings, activeDays, results, totalInterest, totalWithdrawals, peakBalance, warnings, silent) {
+      var finalBalance = results.length ? results[results.length - 1].closingBalance : settings.initialAmount;
+      var endDate = activeDays.length ? activeDays[activeDays.length - 1] : settings.startDate;
+      var netProfit = finalBalance + totalWithdrawals - settings.initialAmount;
+      var goalReached = null;
+      var i;
+
+      for (i = 0; i < results.length; i += 1) {
+        if (settings.goalAmount !== null && results[i].closingBalance >= settings.goalAmount) {
+          goalReached = results[i];
+          break;
+        }
+      }
+
+      latestPlan = {
+        settings: settings,
+        results: results
+      };
+
+      renderSummary(settings, results, finalBalance, totalInterest, totalWithdrawals, netProfit, peakBalance, endDate, goalReached);
+      renderTable(results, settings);
+      drawChart(results, settings);
+
+      if (warnings.length > 0) {
+        setStatus(warnings.join(" "), "warning");
+      } else {
+        setStatus(
+          "Plan built for " + results.length + " active day(s), ending " + formatDateLong(endDate) + ".",
+          silent ? "success" : "success"
+        );
+      }
+    }
+
+    function readSettings() {
+      var initialAmount = parseFloat(dom.initialAmount.value);
+      var baseRatePercent = parseFloat(dom.dailyRate.value);
+      var days = parseInt(dom.days.value, 10);
+      var startDate = parseDateValue(dom.startDate.value);
+      var goalRaw = trimValue(dom.goalAmount.value);
+      var goalAmount = goalRaw === "" ? null : parseFloat(goalRaw);
+      var accountCurrency = dom.accountCurrency.value || "USD";
+      var includeWeekends = dom.includeWeekends.checked;
+
+      if (!isFiniteNumber(initialAmount) || initialAmount < 0) {
+        return { ok: false, message: "Enter a valid starting balance." };
+      }
+
+      if (!isFiniteNumber(baseRatePercent) || baseRatePercent < 0) {
+        return { ok: false, message: "Enter a valid base daily target percentage." };
+      }
+
+      if (!isFinite(days) || days < 1) {
+        return { ok: false, message: "Enter a valid number of active days." };
+      }
+
+      if (!startDate) {
+        return { ok: false, message: "Choose a valid start date." };
+      }
+
+      if (goalAmount !== null && (!isFiniteNumber(goalAmount) || goalAmount < 0)) {
+        return { ok: false, message: "Goal amount must be blank or a valid positive number." };
+      }
+
+      return {
+        ok: true,
+        initialAmount: initialAmount,
+        baseDailyRate: baseRatePercent / 100,
+        baseRatePercent: baseRatePercent,
+        days: days,
+        startDate: startDate,
+        goalAmount: goalAmount,
+        accountCurrency: accountCurrency,
+        includeWeekends: includeWeekends
+      };
+    }
+
+    function readRateChanges() {
+      var rows = dom.rateChangesList.querySelectorAll(".event-row");
+      var events = [];
+      var incompleteCount = 0;
+      var i;
+
+      for (i = 0; i < rows.length; i += 1) {
+        rows[i].classList.remove("incomplete");
+        if (!pushRateEvent(rows[i], i, events)) {
+          if (rowHasInput(rows[i], ".rate-value")) {
+            rows[i].classList.add("incomplete");
+            incompleteCount += 1;
+          }
+        }
+      }
+
+      return { events: events, incompleteCount: incompleteCount };
+    }
+
+    function pushRateEvent(row, index, events) {
+      var triggerType = row.querySelector(".event-trigger").value;
+      var dayValue = parseInt(row.querySelector(".trigger-day").value, 10);
+      var dateValue = row.querySelector(".trigger-date").value;
+      var ratePercent = parseFloat(row.querySelector(".rate-value").value);
+      var label = trimValue(row.querySelector(".event-label").value);
+      var validTrigger;
+
+      if (!rowHasInput(row, ".rate-value")) {
+        return true;
+      }
+
+      validTrigger = triggerType === "day"
+        ? isFinite(dayValue) && dayValue > 0
+        : !!parseDateValue(dateValue);
+
+      if (!validTrigger || !isFiniteNumber(ratePercent) || ratePercent < 0) {
+        return false;
+      }
+
+      events.push({
+        sourceIndex: index,
+        triggerType: triggerType,
+        dayNumber: dayValue,
+        date: dateValue,
+        ratePercent: ratePercent,
+        rateDecimal: ratePercent / 100,
+        label: label
+      });
+
+      return true;
+    }
+
+    function readWithdrawals() {
+      var rows = dom.withdrawalsList.querySelectorAll(".event-row");
+      var events = [];
+      var incompleteCount = 0;
+      var i;
+
+      for (i = 0; i < rows.length; i += 1) {
+        rows[i].classList.remove("incomplete");
+        if (!pushWithdrawalEvent(rows[i], i, events)) {
+          if (rowHasInput(rows[i], ".withdraw-value")) {
+            rows[i].classList.add("incomplete");
+            incompleteCount += 1;
+          }
+        }
+      }
+
+      return { events: events, incompleteCount: incompleteCount };
+    }
+
+    function pushWithdrawalEvent(row, index, events) {
+      var triggerType = row.querySelector(".event-trigger").value;
+      var dayValue = parseInt(row.querySelector(".trigger-day").value, 10);
+      var dateValue = row.querySelector(".trigger-date").value;
+      var mode = row.querySelector(".withdraw-kind").value;
+      var value = parseFloat(row.querySelector(".withdraw-value").value);
+      var timing = row.querySelector(".withdraw-timing").value;
+      var label = trimValue(row.querySelector(".event-label").value);
+      var validTrigger;
+
+      if (!rowHasInput(row, ".withdraw-value")) {
+        return true;
+      }
+
+      validTrigger = triggerType === "day"
+        ? isFinite(dayValue) && dayValue > 0
+        : !!parseDateValue(dateValue);
+
+      if (!validTrigger || !isFiniteNumber(value) || value < 0) {
+        return false;
+      }
+
+      events.push({
+        sourceIndex: index,
+        triggerType: triggerType,
+        dayNumber: dayValue,
+        date: dateValue,
+        mode: mode,
+        value: value,
+        timing: timing,
+        label: label
+      });
+
+      return true;
+    }
+
+    function rowHasInput(row, valueSelector) {
+      var dayInput = trimValue(row.querySelector(".trigger-day").value);
+      var dateInput = trimValue(row.querySelector(".trigger-date").value);
+      var valueInput = trimValue(row.querySelector(valueSelector).value);
+      var labelInput = trimValue(row.querySelector(".event-label").value);
+      return !!(dayInput || dateInput || valueInput || labelInput);
+    }
+
+    function resolveTimedEvents(events, activeDays) {
+      var byDay = {};
+      var skippedCount = 0;
+      var totalResolved = 0;
+      var i;
+      var dayKey;
+      var effectiveDay;
+
+      for (i = 0; i < events.length; i += 1) {
+        effectiveDay = resolveEffectiveDay(events[i], activeDays);
+        if (!effectiveDay) {
+          skippedCount += 1;
+          continue;
+        }
+
+        dayKey = String(effectiveDay);
+        if (!byDay[dayKey]) {
+          byDay[dayKey] = [];
+        }
+
+        byDay[dayKey].push(copyWithDay(events[i], effectiveDay));
+        totalResolved += 1;
+      }
+
+      for (dayKey in byDay) {
+        if (Object.prototype.hasOwnProperty.call(byDay, dayKey)) {
+          byDay[dayKey].sort(function (left, right) {
+            return left.sourceIndex - right.sourceIndex;
+          });
+        }
+      }
+
+      return {
+        byDay: byDay,
+        skippedCount: skippedCount,
+        totalResolved: totalResolved
+      };
+    }
+
+    function copyWithDay(event, effectiveDay) {
+      var clone = {};
+      var key;
+      for (key in event) {
+        if (Object.prototype.hasOwnProperty.call(event, key)) {
+          clone[key] = event[key];
+        }
+      }
+      clone.effectiveDay = effectiveDay;
+      return clone;
+    }
+
+    function resolveEffectiveDay(event, activeDays) {
+      var eventDate;
+      var i;
+
+      if (event.triggerType === "day") {
+        if (event.dayNumber >= 1 && event.dayNumber <= activeDays.length) {
+          return event.dayNumber;
+        }
+        return null;
+      }
+
+      eventDate = parseDateValue(event.date);
+      if (!eventDate) {
+        return null;
+      }
+
+      for (i = 0; i < activeDays.length; i += 1) {
+        if (activeDays[i].getTime() >= eventDate.getTime()) {
+          return i + 1;
+        }
+      }
+
+      return null;
+    }
+
+    function computeWithdrawalAmount(balance, event) {
+      var rawAmount;
+      if (balance <= 0) {
+        return 0;
+      }
+
+      rawAmount = event.mode === "percent" ? balance * (event.value / 100) : event.value;
+      if (rawAmount < 0) {
+        rawAmount = 0;
+      }
+
+      return Math.min(balance, rawAmount);
+    }
+
+    function buildWithdrawalNote(event, amount, settings) {
+      if (event.mode === "percent") {
+        return "Withdraw " + formatPercent(event.value) + " " + event.timing +
+          (event.label ? " (" + event.label + ")" : "") +
+          " | " + formatMoney(amount, settings.accountCurrency);
+      }
+
+      return "Withdraw " + formatMoney(amount, settings.accountCurrency) + " " + event.timing +
+        (event.label ? " (" + event.label + ")" : "");
+    }
+
+    function buildActiveDays(startDate, dayCount, includeWeekends) {
+      var dates = [];
+      var cursor = cloneDate(startDate);
+
+      while (dates.length < dayCount) {
+        if (includeWeekends || !isWeekend(cursor)) {
+          dates.push(cloneDate(cursor));
+        }
+        cursor.setDate(cursor.getDate() + 1);
+      }
+
+      return dates;
+    }
+
+    function renderSummary(settings, results, finalBalance, totalInterest, totalWithdrawals, netProfit, peakBalance, endDate, goalReached) {
+      var goalText;
+
+      if (settings.goalAmount === null) {
+        goalText = "No goal set yet. Add one to track the first day the plan reaches it.";
+      } else if (goalReached) {
+        goalText = "Reached on day " + goalReached.tradingDay + " | " + formatDateLong(goalReached.date);
+      } else {
+        goalText = "Not reached yet. Short by " +
+          formatMoney(Math.max(settings.goalAmount - finalBalance, 0), settings.accountCurrency) + ".";
+      }
+
+      dom.summaryCards.innerHTML = [
+        summaryCard("Projected Balance", formatMoney(finalBalance, settings.accountCurrency), "Closing balance after " + results.length + " active day(s).", true),
+        summaryCard("Total Interest", formatMoney(totalInterest, settings.accountCurrency), "All daily growth added across the full plan."),
+        summaryCard("Withdrawn / Secured", formatMoney(totalWithdrawals, settings.accountCurrency), "Everything removed through scheduled withdrawals."),
+        summaryCard("Net Profit / Loss", formatMoney(netProfit, settings.accountCurrency), netProfit >= 0 ? "Projected profit after all withdrawals." : "Projected loss after all withdrawals."),
+        summaryCard("Goal Tracker", settings.goalAmount === null ? "No goal set" : formatMoney(settings.goalAmount, settings.accountCurrency), goalText),
+        summaryCard("Plan Window", formatDateShort(settings.startDate) + " to " + formatDateShort(endDate), "Peak balance " + formatMoney(peakBalance, settings.accountCurrency) + " | " + (settings.includeWeekends ? "Weekends included" : "Trading days only"))
+      ].join("");
+    }
+
+    function summaryCard(label, value, context, emphasis) {
+      return '<article class="summary-card' + (emphasis ? ' emphasis' : '') + '">' +
+        '<div class="summary-label">' + escapeHtml(label) + '</div>' +
+        '<div class="summary-value">' + escapeHtml(value) + '</div>' +
+        '<div class="summary-context">' + escapeHtml(context) + '</div>' +
+      "</article>";
+    }
+
+    function renderTable(results, settings) {
+      var html = [];
+      var i;
+      var notes;
+      var row;
+
+      dom.tableMeta.textContent = results.length + " active day(s)";
+
+      if (!results.length) {
+        dom.resultsBody.innerHTML = '<tr><td colspan="9"><div class="note-chip soft">No active days to display yet.</div></td></tr>';
+        return;
+      }
+
+      for (i = 0; i < results.length; i += 1) {
+        row = results[i];
+        notes = row.notes.length ? buildNotes(row.notes) : '<span class="note-chip soft">Base target continues</span>';
+
+        html.push(
+          "<tr>" +
+            '<td><span class="day-pill">Day ' + row.tradingDay + "</span></td>" +
+            "<td><div class=\"date-stack\"><strong>" + escapeHtml(formatDateShort(row.date)) + "</strong><span>" + escapeHtml(formatWeekday(row.date)) + "</span></div></td>" +
+            '<td><span class="rate-tag">' + escapeHtml(formatPercent(row.ratePercent)) + "</span></td>" +
+            "<td>" + escapeHtml(formatMoney(row.openingBalance, settings.accountCurrency)) + "</td>" +
+            "<td>" + escapeHtml(formatMoney(row.withdrawnBefore, settings.accountCurrency)) + "</td>" +
+            "<td>" + escapeHtml(formatMoney(row.interest, settings.accountCurrency)) + "</td>" +
+            "<td>" + escapeHtml(formatMoney(row.withdrawnAfter, settings.accountCurrency)) + "</td>" +
+            "<td>" + escapeHtml(formatMoney(row.closingBalance, settings.accountCurrency)) + "</td>" +
+            '<td><div class="notes-wrap">' + notes + "</div></td>" +
+          "</tr>"
+        );
+      }
+
+      dom.resultsBody.innerHTML = html.join("");
+    }
+
+    function buildMobileMetric(label, value) {
+      return '<div class="mobile-metric"><span class="mobile-metric-label">' + escapeHtml(label) + '</span><span class="mobile-metric-value">' + escapeHtml(value) + '</span></div>';
+    }
+
+    function buildNotes(notes) {
+      var html = [];
+      var i;
+      for (i = 0; i < notes.length; i += 1) {
+        html.push('<span class="note-chip">' + escapeHtml(notes[i]) + "</span>");
+      }
+      return html.join("");
+    }
+
+    function renderEmptyState(message) {
+      dom.summaryCards.innerHTML = summaryCard("Planner Waiting", "Enter valid inputs", message, true);
+      dom.tableMeta.textContent = "Add your plan inputs to see the full breakdown.";
+      dom.resultsBody.innerHTML = '<tr><td colspan="9"><div class="note-chip soft">' + escapeHtml(message) + "</div></td></tr>";
+      dom.mobileResults.innerHTML = '<div class="mobile-result-card"><div class="note-chip soft">' + escapeHtml(message) + '</div></div>';
+      drawChart([], null);
+    }
+
+    function drawChart(results, settings) {
+      var canvas = dom.balanceChart;
+      var rect = canvas.getBoundingClientRect();
+      var width = Math.max(320, Math.floor(rect.width || 320));
+      var height = canvas.offsetHeight || 270;
+      var dpr = window.devicePixelRatio || 1;
+      var ctx = canvas.getContext("2d");
+      var values = [];
+      var maxValue;
+      var padding;
+      var chartWidth;
+      var chartHeight;
+      var pointCount;
+      var points = [];
+      var areaGradient;
+      var i;
+
+      canvas.width = width * dpr;
+      canvas.height = height * dpr;
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      ctx.clearRect(0, 0, width, height);
+
+      ctx.fillStyle = "rgba(255, 255, 255, 0.015)";
+      ctx.fillRect(0, 0, width, height);
+
+      if (!results || !results.length) {
+        ctx.fillStyle = "rgba(216, 229, 248, 0.72)";
+        ctx.font = '600 14px "Manrope"';
+        ctx.textAlign = "center";
+        ctx.fillText("Your balance curve will appear here once the planner has valid inputs.", width / 2, height / 2);
+        return;
+      }
+
+      for (i = 0; i < results.length; i += 1) {
+        values.push(results[i].closingBalance);
+      }
+
+      if (settings && settings.goalAmount !== null) {
+        values.push(settings.goalAmount);
+      }
+
+      maxValue = Math.max.apply(Math, values.concat([1])) * 1.08;
+      padding = { top: 22, right: 18, bottom: 34, left: 62 };
+      chartWidth = width - padding.left - padding.right;
+      chartHeight = height - padding.top - padding.bottom;
+      pointCount = results.length;
+
+      drawChartGrid(ctx, padding, width, chartHeight, maxValue);
+
+      if (settings && settings.goalAmount !== null) {
+        drawGoalLine(ctx, padding, width, chartHeight, maxValue, settings.goalAmount);
+      }
+
+      for (i = 0; i < results.length; i += 1) {
+        points.push({
+          x: pointCount === 1 ? padding.left + chartWidth / 2 : padding.left + (i / (pointCount - 1)) * chartWidth,
+          y: padding.top + chartHeight - (results[i].closingBalance / maxValue) * chartHeight,
+          row: results[i]
+        });
+      }
+
+      areaGradient = ctx.createLinearGradient(0, padding.top, 0, padding.top + chartHeight);
+      areaGradient.addColorStop(0, "rgba(24, 209, 124, 0.28)");
+      areaGradient.addColorStop(1, "rgba(24, 209, 124, 0)");
+
+      ctx.beginPath();
+      ctx.moveTo(points[0].x, padding.top + chartHeight);
+      for (i = 0; i < points.length; i += 1) {
+        ctx.lineTo(points[i].x, points[i].y);
+      }
+      ctx.lineTo(points[points.length - 1].x, padding.top + chartHeight);
+      ctx.closePath();
+      ctx.fillStyle = areaGradient;
+      ctx.fill();
+
+      ctx.beginPath();
+      for (i = 0; i < points.length; i += 1) {
+        if (i === 0) {
+          ctx.moveTo(points[i].x, points[i].y);
+        } else {
+          ctx.lineTo(points[i].x, points[i].y);
+        }
+      }
+      ctx.strokeStyle = "#18d17c";
+      ctx.lineWidth = 3;
+      ctx.stroke();
+
+      drawChartPoints(ctx, points);
+      drawChartLabels(ctx, points, height);
+    }
+
+    function drawChartGrid(ctx, padding, width, chartHeight, maxValue) {
+      var step;
+      var y;
+      var value;
+
+      ctx.strokeStyle = "rgba(255, 255, 255, 0.08)";
+      ctx.lineWidth = 1;
+      ctx.font = '600 12px "Manrope"';
+      ctx.textAlign = "right";
+
+      for (step = 0; step <= 4; step += 1) {
+        y = padding.top + (chartHeight / 4) * step;
+        ctx.beginPath();
+        ctx.moveTo(padding.left, y);
+        ctx.lineTo(width - padding.right, y);
+        ctx.stroke();
+
+        value = maxValue - (maxValue / 4) * step;
+        ctx.fillStyle = "rgba(190, 209, 233, 0.74)";
+        ctx.fillText(formatCompactNumber(value), padding.left - 10, y + 4);
+      }
+    }
+
+    function drawGoalLine(ctx, padding, width, chartHeight, maxValue, goalAmount) {
+      var goalY = padding.top + chartHeight - (goalAmount / maxValue) * chartHeight;
+      ctx.strokeStyle = "rgba(255, 191, 70, 0.45)";
+      ctx.setLineDash([7, 7]);
+      ctx.beginPath();
+      ctx.moveTo(padding.left, goalY);
+      ctx.lineTo(width - padding.right, goalY);
+      ctx.stroke();
+      ctx.setLineDash([]);
+    }
+
+    function drawChartPoints(ctx, points) {
+      var i;
+      for (i = 0; i < points.length; i += 1) {
+        ctx.beginPath();
+        ctx.arc(points[i].x, points[i].y, 4.5, 0, Math.PI * 2);
+        ctx.fillStyle = "#d7ffe7";
+        ctx.fill();
+        ctx.strokeStyle = "#18d17c";
+        ctx.lineWidth = 2;
+        ctx.stroke();
+
+        if (points[i].row.rateChanged) {
+          ctx.beginPath();
+          ctx.arc(points[i].x, points[i].y, 7, 0, Math.PI * 2);
+          ctx.strokeStyle = "#ffbf46";
+          ctx.lineWidth = 2;
+          ctx.stroke();
+        }
+
+        if (points[i].row.hadWithdrawal) {
+          ctx.fillStyle = "#ff7a7a";
+          ctx.fillRect(points[i].x - 4, points[i].y - 4, 8, 8);
+        }
+      }
+    }
+
+    function drawChartLabels(ctx, points, height) {
+      var labels = uniqueIndexes([0, Math.floor((points.length - 1) / 2), points.length - 1]);
+      var i;
+      var pointIndex;
+
+      ctx.fillStyle = "rgba(190, 209, 233, 0.78)";
+      ctx.font = '600 12px "Manrope"';
+      ctx.textAlign = "center";
+
+      for (i = 0; i < labels.length; i += 1) {
+        pointIndex = labels[i];
+        if (points[pointIndex]) {
+          ctx.fillText("Day " + points[pointIndex].row.tradingDay, points[pointIndex].x, height - 12);
+        }
+      }
+    }
+
+    function uniqueIndexes(values) {
+      var seen = {};
+      var result = [];
+      var i;
+      var key;
+
+      for (i = 0; i < values.length; i += 1) {
+        if (values[i] < 0) {
+          continue;
+        }
+        key = String(values[i]);
+        if (!seen[key]) {
+          seen[key] = true;
+          result.push(values[i]);
+        }
+      }
+
+      return result;
+    }
+
+    function setStatus(message, type) {
+      dom.status.className = "status show " + type;
+      dom.status.textContent = message;
+    }
+
+    function safeStorageSet(key, value) {
+      try {
+        window.localStorage.setItem(key, value);
+      } catch (error) {
+        return;
+      }
+    }
+
+    function safeStorageGet(key) {
+      try {
+        return window.localStorage.getItem(key);
+      } catch (error) {
+        return null;
+      }
+    }
+
+    function safeStorageRemove(key) {
+      try {
+        window.localStorage.removeItem(key);
+      } catch (error) {
+        return;
+      }
+    }
+
+    function saveState() {
+      var snapshot = {
+        initialAmount: dom.initialAmount.value,
+        accountCurrency: dom.accountCurrency.value,
+        dailyRate: dom.dailyRate.value,
+        days: dom.days.value,
+        startDate: dom.startDate.value,
+        goalAmount: dom.goalAmount.value,
+        includeWeekends: dom.includeWeekends.checked,
+        rateChanges: serializeRateChanges(),
+        withdrawals: serializeWithdrawals()
+      };
+
+      safeStorageSet(STORAGE_KEY, JSON.stringify(snapshot));
+    }
+
+    function loadState() {
+      var raw = safeStorageGet(STORAGE_KEY);
+      var saved;
+      var i;
+
+      if (!raw) {
+        return false;
+      }
+
+      try {
+        saved = JSON.parse(raw);
+      } catch (error) {
+        return false;
+      }
+
+      dom.initialAmount.value = saved.initialAmount || "";
+      dom.accountCurrency.value = saved.accountCurrency || "USD";
+      dom.dailyRate.value = saved.dailyRate || "";
+      dom.days.value = saved.days || "";
+      dom.startDate.value = saved.startDate || formatDateInput(new Date());
+      dom.goalAmount.value = saved.goalAmount || "";
+      dom.includeWeekends.checked = !!saved.includeWeekends;
+
+      clearEventRows(dom.rateChangesList);
+      clearEventRows(dom.withdrawalsList);
+
+      if (saved.rateChanges) {
+        for (i = 0; i < saved.rateChanges.length; i += 1) {
+          addRateChangeRow(saved.rateChanges[i]);
+        }
+      }
+
+      if (saved.withdrawals) {
+        for (i = 0; i < saved.withdrawals.length; i += 1) {
+          addWithdrawalRow(saved.withdrawals[i]);
+        }
+      }
+
+      refreshListPlaceholder(dom.rateChangesList, "rate");
+      refreshListPlaceholder(dom.withdrawalsList, "withdrawal");
+      return true;
+    }
+
+    function serializeRateChanges() {
+      var rows = dom.rateChangesList.querySelectorAll(".event-row");
+      var items = [];
+      var i;
+
+      for (i = 0; i < rows.length; i += 1) {
+        items.push({
+          triggerType: rows[i].querySelector(".event-trigger").value,
+          dayNumber: rows[i].querySelector(".trigger-day").value,
+          date: rows[i].querySelector(".trigger-date").value,
+          ratePercent: rows[i].querySelector(".rate-value").value,
+          label: rows[i].querySelector(".event-label").value
+        });
+      }
+
+      return items;
+    }
+
+    function serializeWithdrawals() {
+      var rows = dom.withdrawalsList.querySelectorAll(".event-row");
+      var items = [];
+      var i;
+
+      for (i = 0; i < rows.length; i += 1) {
+        items.push({
+          triggerType: rows[i].querySelector(".event-trigger").value,
+          dayNumber: rows[i].querySelector(".trigger-day").value,
+          date: rows[i].querySelector(".trigger-date").value,
+          mode: rows[i].querySelector(".withdraw-kind").value,
+          value: rows[i].querySelector(".withdraw-value").value,
+          timing: rows[i].querySelector(".withdraw-timing").value,
+          label: rows[i].querySelector(".event-label").value
+        });
+      }
+
+      return items;
+    }
+
+    function parseDateValue(value) {
+      var parts;
+      var year;
+      var month;
+      var day;
+      var date;
+
+      if (!value || !/^\d{4}-\d{2}-\d{2}$/.test(value)) {
+        return null;
+      }
+
+      parts = value.split("-");
+      year = parseInt(parts[0], 10);
+      month = parseInt(parts[1], 10);
+      day = parseInt(parts[2], 10);
+      date = new Date(year, month - 1, day);
+
+      if (isNaN(date.getTime())) {
+        return null;
+      }
+
+      date.setHours(0, 0, 0, 0);
+      return date;
+    }
+
+    function formatDateInput(date) {
+      return date.getFullYear() + "-" +
+        pad2(date.getMonth() + 1) + "-" +
+        pad2(date.getDate());
+    }
+
+    function formatDateShort(date) {
+      return date.toLocaleDateString(undefined, {
+        month: "short",
+        day: "numeric",
+        year: "numeric"
+      });
+    }
+
+    function formatDateLong(date) {
+      return date.toLocaleDateString(undefined, {
+        weekday: "short",
+        month: "short",
+        day: "numeric",
+        year: "numeric"
+      });
+    }
+
+    function formatWeekday(date) {
+      return date.toLocaleDateString(undefined, { weekday: "long" });
+    }
+
+    function cloneDate(date) {
+      return new Date(date.getFullYear(), date.getMonth(), date.getDate());
+    }
+
+    function addDays(date, days) {
+      var copy = cloneDate(date);
+      copy.setDate(copy.getDate() + days);
+      return copy;
+    }
+
+    function isWeekend(date) {
+      var day = date.getDay();
+      return day === 0 || day === 6;
+    }
+
+    function formatMoney(value, currencyCode) {
+      var meta = CURRENCY_META[currencyCode] || { symbol: currencyCode + " ", suffix: "" };
+      var absolute = Math.abs(value);
+      var formatted = formatNumber(absolute);
+      var sign = value < 0 ? "-" : "";
+      return sign + meta.symbol + formatted + meta.suffix;
+    }
+
+    function formatNumber(value) {
+      var fixed = (Math.round(value * 100) / 100).toFixed(2);
+      var parts = fixed.split(".");
+      parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+      return parts.join(".");
+    }
+
+    function formatPercent(value) {
+      var rounded = Math.round(value * 100) / 100;
+      if (Math.abs(rounded - Math.round(rounded)) < 0.000001) {
+        return String(Math.round(rounded)) + "%";
+      }
+      return rounded.toFixed(2).replace(/0+$/, "").replace(/\.$/, "") + "%";
+    }
+
+    function formatCompactNumber(value) {
+      var amount = Math.abs(value);
+      if (amount >= 1000000) {
+        return (value / 1000000).toFixed(1).replace(/\.0$/, "") + "M";
+      }
+      if (amount >= 1000) {
+        return (value / 1000).toFixed(1).replace(/\.0$/, "") + "K";
+      }
+      return formatNumber(value);
+    }
+
+    function pad2(value) {
+      return String(value).length < 2 ? "0" + value : String(value);
+    }
+
+    function trimValue(value) {
+      return String(value || "").replace(/^\s+|\s+$/g, "");
+    }
+
+    function isFiniteNumber(value) {
+      return typeof value === "number" && isFinite(value);
+    }
+
+    function escapeHtml(value) {
+      return String(value)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#39;");
+    }
+
+    onReady(function () {
+      try {
+        cacheDom();
+        bindEvents();
+
+        if (!loadState()) {
+          applyDefaults();
+        }
+
+        refreshListPlaceholder(dom.rateChangesList, "rate");
+        refreshListPlaceholder(dom.withdrawalsList, "withdrawal");
+        calculatePlan(true);
+      } catch (error) {
+        if (dom.status) {
+          setStatus("The planner hit a startup issue on this device. Reload the page and try again.", "error");
+        }
+        if (window.console && console.error) {
+          console.error(error);
+        }
+      }
+    });
+  </script>
+</body>
+</html>
