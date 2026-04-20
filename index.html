@@ -814,6 +814,21 @@
       color: #d9e7fb;
     }
 
+    .hero p {
+      max-width: 42ch;
+    }
+
+    @media (max-width: 620px) {
+      .section-head p,
+      .table-meta {
+        font-size: 0.86rem;
+      }
+
+      .section-head p {
+        margin-top: 6px;
+      }
+    }
+
     @media (min-width: 860px) {
       .hero {
         grid-template-columns: minmax(0, 1.2fr) minmax(250px, 0.85fr);
@@ -912,29 +927,11 @@
   <div class="app">
     <section class="hero card">
       <div>
-        <div class="eyebrow">Forex Trading Planner</div>
-        <h1>Nams Trading Planner Calculator</h1>
+        <div class="eyebrow">Trading Planner</div>
+        <h1>Nams Planner</h1>
         <p>
-          A mobile-friendly trading planner for daily target changes, date-based strategy shifts,
-          symbol-only currency switching, and scheduled withdrawals by amount or percentage.
+          Set your target, stack rate changes, and schedule withdrawals.
         </p>
-        <div class="hero-badges">
-          <span class="badge">iPhone-friendly layout</span>
-          <span class="badge">Currency options built in</span>
-          <span class="badge">Stacked rate changes</span>
-          <span class="badge">Fixed and % withdrawals</span>
-        </div>
-      </div>
-
-      <div class="hero-notes">
-        <div class="hero-note">
-          <strong>Example plan</strong>
-          <span>Keep 10% for the first 5 trading days, then shift to 5%, then 3.5%, while scheduling withdrawals along the way.</span>
-        </div>
-        <div class="hero-note">
-          <strong>Built to fit</strong>
-          <span>The page stacks naturally on phones so the planner stays readable at normal zoom instead of pushing content off screen.</span>
-        </div>
       </div>
     </section>
 
@@ -1091,33 +1088,8 @@
         </div>
         <div class="mobile-cards" id="mobileResults"></div>
       </section>
-
-      <section class="card section">
-        <div class="section-head">
-          <h2>Planner Rules</h2>
-          <p>These rules keep the forecast consistent when you stack multiple events.</p>
-        </div>
-        <div class="rules-grid">
-          <div class="rule">
-            <strong>Rate changes stay active</strong>
-            <span>Once a new daily target begins, it stays active until another scheduled target replaces it.</span>
-          </div>
-          <div class="rule">
-            <strong>Date events respect trading days</strong>
-            <span>If weekends are off, date-based events shift onto the first valid active day on or after that date.</span>
-          </div>
-          <div class="rule">
-            <strong>Withdrawals can stack</strong>
-            <span>Multiple withdrawals on the same day are supported, both as fixed amounts and as percentages.</span>
-          </div>
-        </div>
-      </section>
     </div>
-
-    <p class="footer">
-      <strong>Nams Forex Trading Planner</strong> is meant for planning and scenario testing. It does not promise trading returns, but it gives a clearer way to map changing targets and withdrawals.
-    </p>
-  </div>
+</div>
 
   <template id="rateChangeTemplate">
     <div class="event-row rate-row">
@@ -1994,6 +1966,7 @@
 
     function renderTable(results, settings) {
       var html = [];
+      var mobileHtml = [];
       var i;
       var notes;
       var row;
@@ -2002,6 +1975,7 @@
 
       if (!results.length) {
         dom.resultsBody.innerHTML = '<tr><td colspan="9"><div class="note-chip soft">No active days to display yet.</div></td></tr>';
+        dom.mobileResults.innerHTML = '<div class="mobile-result-card"><div class="note-chip soft">No active days to display yet.</div></div>';
         return;
       }
 
@@ -2022,9 +1996,28 @@
             '<td><div class="notes-wrap">' + notes + "</div></td>" +
           "</tr>"
         );
+
+        mobileHtml.push(
+          '<div class="mobile-result-card">' +
+            '<div class="mobile-result-head">' +
+              '<span class="day-pill">Day ' + row.tradingDay + '</span>' +
+              '<span class="rate-tag">' + escapeHtml(formatPercent(row.ratePercent)) + '</span>' +
+            '</div>' +
+            '<div class="date-stack"><strong>' + escapeHtml(formatDateShort(row.date)) + '</strong><span>' + escapeHtml(formatWeekday(row.date)) + '</span></div>' +
+            '<div class="mobile-result-grid">' +
+              buildMobileMetric('Opening', formatMoney(row.openingBalance, settings.accountCurrency)) +
+              buildMobileMetric('Interest', formatMoney(row.interest, settings.accountCurrency)) +
+              buildMobileMetric('Withdraw Before', formatMoney(row.withdrawnBefore, settings.accountCurrency)) +
+              buildMobileMetric('Withdraw After', formatMoney(row.withdrawnAfter, settings.accountCurrency)) +
+              buildMobileMetric('Closing', formatMoney(row.closingBalance, settings.accountCurrency)) +
+            '</div>' +
+            '<div class="notes-wrap">' + notes + '</div>' +
+          '</div>'
+        );
       }
 
       dom.resultsBody.innerHTML = html.join("");
+      dom.mobileResults.innerHTML = mobileHtml.join("");
     }
 
     function buildMobileMetric(label, value) {
